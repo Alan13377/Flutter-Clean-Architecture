@@ -1,9 +1,11 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart';
 
 import 'src/data/repositories_implemention/authentication_repository_impl.dart';
 import 'src/data/repositories_implemention/connectivity_implementation.dart';
+import 'src/data/services/remote/auth_api.dart';
 import 'src/data/services/remote/internet_checker.dart';
 import 'src/domain/repositories/authentication_repository.dart';
 import 'src/domain/repositories/connectivity_repository.dart';
@@ -20,6 +22,9 @@ void main() {
       ),
       authenticationRepository: AuthenticationRepositoryImpl(
         const FlutterSecureStorage(),
+        AuthenticationApi(
+          Client(),
+        ),
       ),
       child: const MyApp(),
     ),
