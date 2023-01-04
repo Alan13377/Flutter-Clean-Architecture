@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 
+import 'src/data/http/http.dart';
 import 'src/data/repositories_implemention/authentication_repository_impl.dart';
 import 'src/data/repositories_implemention/connectivity_implementation.dart';
 import 'src/data/services/remote/auth_api.dart';
@@ -23,7 +24,11 @@ void main() {
       authenticationRepository: AuthenticationRepositoryImpl(
         const FlutterSecureStorage(),
         AuthenticationApi(
-          Client(),
+          Http(
+            client: Client(),
+            baseUrl: 'https://api.themoviedb.org/3',
+            apiKey: '6f6a8ae60bfbc11f439583921b9326c1',
+          ),
         ),
       ),
       child: const MyApp(),
@@ -49,7 +54,7 @@ class Injector extends InheritedWidget {
 
   static Injector of(BuildContext context) {
     final injector = context.dependOnInheritedWidgetOfExactType<Injector>();
-    assert(injector != null, "Injector could not be found");
+    assert(injector != null, 'Injector could not be found');
     return injector!;
   }
 }

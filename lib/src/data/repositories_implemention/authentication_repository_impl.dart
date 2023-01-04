@@ -30,46 +30,45 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   Future<Either<SignInFailure, User>> signIn(
       String userName, String password) async {
     //*Llamamos a la clase de Autenticacion
-    final requestToken = await _authenticationApi.createRequestToken();
-    //*SI el token es nullo
-    if (requestToken == null) {
-      return Either.left(
-        SignInFailure.unknown,
-      );
-    }
-    final loginResult = await _authenticationApi.createSesionWithLogin(
-      userName: userName,
-      password: password,
-      requestToken: requestToken,
+    final requestTokenResult = await _authenticationApi.createRequestToken();
+    return requestTokenResult.when(
+      (failure) => Either.left(failure),
+      (requestToken) async {
+        final loginResult = await _authenticationApi.createSesionWithLogin(
+          userName: userName,
+          password: password,
+          requestToken: requestToken,
+        );
+
+        return loginResult.when((
+          failure,
+        ) async {
+          return Either.left(
+            failure,
+          );
+        }, (
+          newRequestToken,
+        ) async {
+          final sessionResult = await _authenticationApi.createSesion(
+            newRequestToken,
+          );
+          return sessionResult.when(
+              (failure) async => Either.left(
+                    failure,
+                  ), (
+            sessionId,
+          ) async {
+            await _secureStorage.write(
+              key: _key,
+              value: sessionId,
+            );
+            return Either.right(
+              User(),
+            );
+          });
+        });
+      },
     );
-    print('Request Token:::::$requestToken');
-    return loginResult.when((
-      failure,
-    ) async {
-      return Either.left(
-        failure,
-      );
-    }, (
-      newRequestToken,
-    ) async {
-      final sessionResult = await _authenticationApi.createSesion(
-        newRequestToken,
-      );
-      return sessionResult.when(
-          (failure) async => Either.left(
-                failure,
-              ), (
-        sessionId,
-      ) async {
-        await _secureStorage.write(
-          key: _key,
-          value: sessionId,
-        );
-        return Either.right(
-          User(),
-        );
-      });
-    });
   }
 
   @override
